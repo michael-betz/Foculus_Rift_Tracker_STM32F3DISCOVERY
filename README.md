@@ -1,6 +1,7 @@
 Foculus_Rift_Tracker_STM32F3DISCOVERY
 =====================================
 
+<pre>
 // The "Foculus Rift" tracker
 //-------------------------------
 // A USB HID device, sending Accelerometer, Gyroscope and Magnetometer data over USB in a
@@ -28,3 +29,4 @@ Foculus_Rift_Tracker_STM32F3DISCOVERY
 //				Added temperature readout from gyro
 //				Added some nice LED animations for IDLE mode, Tracker running mode and Calibration mode
 // 01.04.2014:	Gyro offset calibration is now saved to Flash at address 0x08006000 and hence retained after power off
+</pre>
