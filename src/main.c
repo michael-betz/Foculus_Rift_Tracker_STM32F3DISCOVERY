@@ -1,23 +1,44 @@
 /**
  ******************************************************************************
  * @file    main.c
- * @author  M. Betz
+ * @author  YFL
  * @version V0.3
- * @date    29.3.2014
+ * @date    13.4.2014
  * @brief   Main program body
  ******************************************************************************
  */
 
 // The "Foculus Rift" tracker
-//-------------------------------
-// A USB HID device, sending Accelerometer, Gyroscope and Magnetometer data over USB in a
-// Rift compatible format
+//------------------------------------------------------------------
+// A USB HID device, sending Accelerometer, Gyroscope and Magnetometer data over USB in an
+// Oculus Rift compatible format.
+// This project comes in useful, if you are building your own DIY Head Mounted Display.
+// It solves the problem of finding a motion tracker.
+// The firmware runs on the STM32F3DISCOVERY board and should be compatible with all Oculus Rift games.
+
+// development blog:   http://yetifrisstlama.blogspot.fr/2014/03/the-foculus-rift-part-2-reverse.html
+
+// Organization:
+//------------------------------------------------------------------
+// main.c   		main logic of the tracker,
+//                  handling and reformating the sensor data stream and packing it into 62 byte packets to be sent over USB,
+//                  Assign the coordinate system directions
+//                  keeping track of the configuration data structures which the libOVR might send and request
+// peripherals.c    setup and request data from the 3 sensor chips over SPI and I2C
+//                  Handle the scaling and calibration factors, so the headtracker moves in the right way
+//                  Zero-level calibration routine for the gyroscope
+//                  Save calibration factors to flash
+//                  PWM-patterns for the 8 status LEDs
+// usb_desc.c       USB - HID descriptors, which fool the PC into thinking that there is an Oculus RIft corrected
+// usb_endp.c       STM USB driver endpoint1 callbacks, just sets some global flags to inform the main routine when there is new data
+// usb_prop.c       Customization of the STM USB driver, so feature reports can be sent and received
+//                  received data is copied in the global array featureReportData[] and then processed by the main loop
+
 
 // THings to implement
-//-------------------------------
+//------------------------------------------------------------------
 // * Evaluate the flags, I still do not have a clue what they are used for
 // * What is this mysterious 16 bit command field in the Oculus packets for?
-// * Why is there still no good yaw drift correction?
 // * FixMe: There is this strange synchronization issue, where featureReportData[] sometimes contains invalid data when evaluated in main()
 
 

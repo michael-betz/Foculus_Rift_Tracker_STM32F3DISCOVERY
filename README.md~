@@ -52,7 +52,7 @@ Flashing the STM32F3DISCOVERY board
 sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f3discovery.cfg -c init -c"reset halt" -c"flash erase_sector 0 0 127" -c"flash write_image stm32f3_HID_for_real.elf"
 ```
 
-The firmware, which is contained in the stm32f3_HID_for_real.elf binary file, should be flashed. If everything goes well, you can connect the board on the USB USER connector and it should be recognized as: "Oculus VR, Inc. Tracker DK". That's it, mount the board on your HMD and start up the Oculus World Demo.
+The firmware should be programmed. If everything goes well, you can connect the board on the USB USER connector and it should be recognized as: "Oculus VR, Inc. Tracker DK". That's it, mount the board on your HMD and start up the Oculus World Demo.
 
 Changelog
 --------------------------------
