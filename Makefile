@@ -70,7 +70,6 @@ all: $(PROJ_NAME).bin $(PROJ_NAME).hex info
 
 # Clean Target
 clean:
-	rm -f $(PROJ_NAME).elf
 	rm -f $(PROJ_NAME).bin
 	rm -f $(PROJ_NAME).map
 	@rm -f *.d *.o *.a $(subst .c,.d,$(SOURCES)) $(subst .c,.o,$(SOURCES))
