@@ -56,6 +56,8 @@
 //				Added temperature readout from gyro
 //				Added some nice LED animations for IDLE mode, Tracker running mode and Calibration mode
 // 01.04.2014:	Gyro offset calibration is now saved to Flash at address 0x08006000 and hence retained after power off
+// 08.05.2014:	Fixed bug in readSensorAcc(): an array was accessed outside its boundaries.
+//				also included the .hex file and switched on compiler optimizations
 
 #pragma pack(1)		//If this is not defined, GCC Will use padding bytes and mess up the union structs
 

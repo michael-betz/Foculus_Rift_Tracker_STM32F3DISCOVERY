@@ -52,7 +52,7 @@ MCU 		= -mthumb -mcpu=cortex-m4
 FPU 		= -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 DEFINES 	= -DSTM32F3XX -DUSE_STDPERIPH_DRIVER -DARM_MATH_CM4
 DEBUG		= -g
-OPTIMIZE	= -O0
+OPTIMIZE	= -O3
 
 # Set Compilation and Linking Flags
 CFLAGS 		= $(MCU) $(FPU) $(DEBUG) -Wall -std=gnu90 $(OPTIMIZE) -ffunction-sections -fdata-sections
@@ -66,7 +66,7 @@ CPPFLAGS	= $(INCLUDES) $(DEFINES)
 
 .SILENT: 
 
-all: $(PROJ_NAME).bin info
+all: $(PROJ_NAME).bin $(PROJ_NAME).hex info
 
 # Clean Target
 clean:
@@ -121,9 +121,9 @@ install-ocd: $(PROJ_NAME).elf
 #ocd-shell: stm32f3.bin
 #	telnet localhost 4444
 
-#$(PROJ_NAME).hex: $(PROJ_NAME).elf
-#	@$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
-#	@echo $@
+$(PROJ_NAME).hex: $(PROJ_NAME).elf
+	@$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
+	@echo $@
 
 #$(PROJ_NAME).lst: $(PROJ_NAME).elf
 #	@$(OBJDUMP) -h -S $(PROJ_NAME).elf > $(PROJ_NAME).lst

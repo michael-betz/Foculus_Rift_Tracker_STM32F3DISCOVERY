@@ -306,7 +306,7 @@ void readSensorAcc( int32_t* pfData ) {
 	LSM303DLHC_Read(ACC_I2C_ADDRESS, LSM303DLHC_OUT_X_L_A, buffer, 6);
 
 	//Assume little endian mode!
-	for (i=0; i<=3; i++) {
+	for (i=0; i<=2; i++) {
 		tempValueFl = (int16_t)( ((uint16_t) buffer[2*i+1] << 8) + buffer[2*i] );//Convert 2 * 8 bit to 32 bit signed integer
 		tempValueFl *= accScalingFactors[i];									 //Scale to physical units [10^-4 m/s^2]
 		pfData[i] = (int32_t)tempValueFl;										 //X, Y, Z
@@ -335,7 +335,7 @@ int16_t readSensorMag( int16_t* pfData ) {
 	/* Read the 12 bit mag vector data in the buffer*/
 	LSM303DLHC_Read(MAG_I2C_ADDRESS, LSM303DLHC_OUT_X_H_M, buffer, 6);
 	//Assume little endian mode!
-	for (i = 0; i < 3; i++) {
+	for (i=0; i<=2; i++) {
 		//Unscaled 16 bit value (only 12 valid bits on LSB)
 		tempValueFl = (int16_t)( ((uint16_t) buffer[2*i] << 8) | buffer[2*i+1] );
 		tempValueFl *= magScalingFactors[i];									 //Scale to physical units [10^-4 Gauss]
@@ -397,7 +397,7 @@ void LED_ani_idle(){
 	const static uint8_t BRIGHTNESS_LENGTH = 24;				//Length of the bightness array
 	uint8_t tmpOut=0, portPinMask, portPin, temp, temp2;
 	if(--wait==0){												//Every _wait_ cycles, rotate the BRIGHTNESS array by one
-		wait = 13000;
+		wait = 25000;
 		temp2 = BRIGHTNESS[ 0 ];								//Save lowest element
 		for( temp=0; temp<BRIGHTNESS_LENGTH-1; temp++){
 			BRIGHTNESS[ temp ] = BRIGHTNESS[ temp+1 ];			//Move all elements one step down
