@@ -90,4 +90,3 @@ Changelog
  11.05.2014:  Experimental: Setting of board orientation ...
               Push the user button for > 1 s to choose between 8 preconfigured orientation settings
               Push the user button again for > 1 s to save the setting to FLASH memory
-</pre>
