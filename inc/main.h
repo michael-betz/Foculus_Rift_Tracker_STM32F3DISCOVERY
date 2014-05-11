@@ -43,9 +43,17 @@
 #include "usb_desc.h"
 
 
-/* Exported types ------------------------------------------------------------*/
+/* Exported variables ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
-
+#define cgX 0		//Arrangements of the sensor coordinates in each array
+#define cgY 1		//( used in packFoculusdataBlock() )
+#define cgZ 2
+#define caX 0
+#define caY 1
+#define caZ 2
+#define cmX 0
+#define cmY 2
+#define cmZ 1
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void USB_Config (void);

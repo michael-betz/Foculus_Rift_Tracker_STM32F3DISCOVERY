@@ -24,7 +24,7 @@ Things to implement
 Organization of the code
 -------------------------
 <pre>
- main.c   	      main logic of the tracker,
+ main.c           main logic of the tracker,
                   handling and reformating the sensor data stream and packing it into 62 byte packets to be sent over USB,
                   Assign the coordinate system directions
                   keeping track of the configuration data structures which the libOVR might send and request
@@ -54,6 +54,22 @@ sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f3discovery.cfg -c i
 
 The firmware, which is contained in the stm32f3_HID_for_real.elf binary file, should be flashed. If everything goes well, you can connect the board on the USB USER connector and it should be recognized as: "Oculus VR, Inc. Tracker DK". That's it, mount the board on your HMD and start up the Oculus World Demo.
 
+
+Calibration and change of orientation
+--------------------------------------
+To calibrate the Gyroscope for zero-offset (which reduces drift), place the STM board on a flat surface
+and push the blue "USER" button for less than 1 second. Make sure that
+the board absolutely does not move while the calibration is in progress. The data is permanently stored
+in FLASH memory and retained after power down.
+
+To change the reported coordinate system and hence the orientation of the board, push the "USER" button
+for > 1 second. Then you will be able to select one out of 8 preconfigured orientation settings,
+indicated by the blinking LED. After pushing the "USER" button again for > 1 second, the setting
+is also permanently saved to FLASH memory.
+
+ToDo: Add a table here, showing the preconfigured orientations  
+
+
 Changelog
 --------------------------------
 <pre>
@@ -64,9 +80,14 @@ Changelog
               Enabled FIFO in Streaming mode of Accelerometer and Gyro (no samples will be lost!)
               Fixed Glitches in Magnetometer output by setting it to 75 Hz measurement rate (was 220 Hz before)
  23.03.2014:  Fixed a problem with the USB interrupt and atomic access, not allowing the tracker to change sensor scale
-			  Changed sensor scaling to floating point numbers and scaled to values as expected from the SDK
+              Changed sensor scaling to floating point numbers and scaled to values as expected from the SDK
  29.03.2014:  Added gyroscope "set to zero" calibration routine (Press the user button on the STM board and keep it very still)
-			  Added temperature readout from gyro
-			  Added some nice LED animations for IDLE mode, Tracker running mode and Calibration mode
+              Added temperature readout from gyro
+              Added some nice LED animations for IDLE mode, Tracker running mode and Calibration mode
  01.04.2014:  Gyro offset calibration is now saved to Flash at address 0x08006000 and hence retained after power off
+ 08.05.2014:  Fixed bug in readSensorAcc(): an array was accessed outside its boundaries.
+              also included the .hex file and switched on compiler optimizations
+ 11.05.2014:  Experimental: Setting of board orientation ...
+              Push the user button for > 1 s to choose between 8 preconfigured orientation settings
+              Push the user button again for > 1 s to save the setting to FLASH memory
 </pre>

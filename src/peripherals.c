@@ -146,16 +146,17 @@ void saveCalibrationToFlash(){
 //	Reprogramm FLASH
 	FLASH_ProgramWord(flashAdr, 0xDEADBEEF);			//Set the magic word
 	flashAdr += 4;
-	for( j=0; j<=2; j++ ){
-		for( i=0; i<=2; i++ ){
-			FLASH_ProgramWord(flashAdr, *ramAdrs[j]++);
+	for( j=0; j<=2; j++ ){								//for each calibration array (corresponding to one scale)
+		for( i=0; i<=2; i++ ){							//3 consecutive floats are written
+			FLASH_ProgramWord(flashAdr, *ramAdrs[j]++);	//4 bytes are copied at once (1 uint32 or 1 float)
 			flashAdr += 4;
 		}
 	}
+	FLASH_ProgramWord(flashAdr, (uint32_t)orientationIndex );	//Write current orientation
 	FLASH_Lock();
 }
 
-//Restore calibration values from flash
+//Restore calibration values and orientation from flash
 void restoreCalibrationFromFlash(){
 	uint32_t *calibFlashAdr = (uint32_t*)FLASH_USER_START_ADDR;
 	if ( *calibFlashAdr == 0xDEADBEEF ){				//Only do something if the magic word is there
@@ -165,6 +166,8 @@ void restoreCalibrationFromFlash(){
 		memcpy( gyroBiasCalValue500, calibFlashAdr, 3*sizeof(float) );
 		calibFlashAdr += 3;
 		memcpy( gyroBiasCalValue2000, calibFlashAdr, 3*sizeof(float) );
+		calibFlashAdr += 3;
+		orientationIndex = (uint8_t)(*calibFlashAdr);
 	}
 }
 
@@ -427,4 +430,25 @@ void LEDs_Off(void) {
 	for (i = LED3; i <= LED10; i++) {
 		STM_EVAL_LEDOff(i);
 	}
+}
+
+//If button not pressed: returns 0
+//If button is pressed it blocks for 1 s to measure time length
+//If button is pressed < 1 s: returns 1
+//If button is pressed > 1 s: returns 2
+uint8_t getShortLongButtonPress(){
+	if ( STM_EVAL_PBGetState( BUTTON_USER ) ){	//Check if button is pressed
+		delayms( 50 );							//Debounce
+		if ( !STM_EVAL_PBGetState( BUTTON_USER ) ){
+			return 0;							//Just a fluke, ignore
+		}
+		timerDelayCountdown = 1000;				//Set countdwon timer to 1 s to find long button press
+		while( STM_EVAL_PBGetState( BUTTON_USER ) && (timerDelayCountdown>0) ){	; } // Wait max 2s. for button release
+		if( timerDelayCountdown>0 ){			//Short button press
+			return 1;
+		} else {								//Long button press
+			return 2;
+		}
+	}
+	return 0;
 }

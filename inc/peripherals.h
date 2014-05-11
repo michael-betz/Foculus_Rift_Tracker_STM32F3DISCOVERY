@@ -54,6 +54,7 @@
 #define FLASH_USER_START_ADDR   0x08006000   // Start @ of user Flash area (Program code goes to 0x08005268)
 void restoreCalibrationFromFlash();
 void saveCalibrationToFlash();
+extern uint8_t orientationIndex;			 //Holds the current orientation setting of the coordinate system (0-7)
 
 
 void initSensorGyro( uint16_t gyroScale );
@@ -67,6 +68,7 @@ uint8_t isMagNewData();
 int16_t readSensorMag( int16_t* pfData );
 
 void delayms( uint32_t delay );
+extern __IO uint32_t timerDelayCountdown;
 
 void LED_Config(void);
 void LED_out_byte( uint8_t dat );
@@ -74,5 +76,11 @@ void LED_out( uint8_t dat );
 void LEDs_Off(void);
 void LED_ani_idle();
 void LED_ani_run();
+
+//If button not pressed: returns 0
+//If button is pressed it blocks for 1 s to measure time length
+//If button is pressed < 1 s: returns 1
+//If button is pressed > 1 s: returns 2
+uint8_t getShortLongButtonPress();
 
 #endif /* PERIPHERALS_H_ */

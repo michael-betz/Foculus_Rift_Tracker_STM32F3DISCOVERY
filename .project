@@ -31,7 +31,7 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1397412138155</id>
+			<id>1399845800414</id>
 			<name></name>
 			<type>21</type>
 			<matcher>
@@ -40,7 +40,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1397412138165</id>
+			<id>1399845800420</id>
 			<name></name>
 			<type>21</type>
 			<matcher>
@@ -49,7 +49,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1397412138174</id>
+			<id>1399845800425</id>
 			<name></name>
 			<type>5</type>
 			<matcher>
@@ -58,7 +58,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1397412138182</id>
+			<id>1399845800429</id>
 			<name></name>
 			<type>5</type>
 			<matcher>
@@ -67,7 +67,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1397412138193</id>
+			<id>1399845800435</id>
 			<name></name>
 			<type>21</type>
 			<matcher>
@@ -76,7 +76,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1397412138202</id>
+			<id>1399845800437</id>
 			<name></name>
 			<type>5</type>
 			<matcher>
@@ -85,7 +85,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1397412138208</id>
+			<id>1399845800439</id>
 			<name></name>
 			<type>5</type>
 			<matcher>
@@ -94,12 +94,39 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1397412138217</id>
+			<id>1399845800444</id>
 			<name></name>
 			<type>5</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
 				<arguments>1.0-name-matches-false-false-*.elf</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1399845800450</id>
+			<name></name>
+			<type>5</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-*.hex</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1399845800454</id>
+			<name></name>
+			<type>5</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-*.elf</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1399845800457</id>
+			<name></name>
+			<type>5</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-false-*.*</arguments>
 			</matcher>
 		</filter>
 	</filteredResources>

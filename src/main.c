@@ -2,8 +2,8 @@
  ******************************************************************************
  * @file    main.c
  * @author  YFL
- * @version V0.3
- * @date    13.4.2014
+ * @version V0.4
+ * @date    11.5.2014
  * @brief   Main program body
  ******************************************************************************
  */
@@ -58,6 +58,9 @@
 // 01.04.2014:	Gyro offset calibration is now saved to Flash at address 0x08006000 and hence retained after power off
 // 08.05.2014:	Fixed bug in readSensorAcc(): an array was accessed outside its boundaries.
 //				also included the .hex file and switched on compiler optimizations
+// 11.05.2014:	Experimental: Setting of board orientation ...
+//				Push the user button for > 1 s to choose between 8 preconfigured orientation settings
+//				Push the user button again for > 1 s to save the setting to FLASH memory
 
 #pragma pack(1)		//If this is not defined, GCC Will use padding bytes and mess up the union structs
 
@@ -77,6 +80,9 @@ RiftScaleFrameSep dataScale;
 RiftSensorFrameSep dataToBeSent;
 __IO uint8_t EP1flagTXcomplete = 1;
 __IO uint8_t EP1flagRXcomplete = 0;
+uint8_t orientationIndex=0;						//Holds the current orientation setting of the coordinate system (0-7)
+												//This variable is saved to flash and restored on power up
+												//Setup the corresponding orientations in packFoculusdataBlock()
 
 /* Private variables ---------------------------------------------------------*/
 RCC_ClocksTypeDef RCC_Clocks;
@@ -100,6 +106,47 @@ enum FoculusStates {
     FocSt_SendData		// Send data
 };
 uint8_t focState = FocSt_Init;
+
+
+//Implement the user interface in one big ugly blocking function.
+//I'm fully aware that this does stall the USB communications, which might cause trouble!
+void handleButton(){
+	uint8_t i;
+	LED_out_byte( 0x00 );						//See how long ...
+	i = getShortLongButtonPress();
+	if( i==1 ){									//Short button press
+		for (i=0; i<=5; i++){					//Blink LEDs 5 times to indicate gyro bias calibration
+			delayms( 100 );
+			LED_out_byte( 0xFF );
+			delayms( 100 );
+			LED_out_byte( 0x00 );
+		}
+		doGyroBiasCalibration();				//Start calibration measurement
+	} else if( i==2 ){							//Long button press, do selection of orientation
+		STM_EVAL_LEDOn( orientationIndex );
+		while( STM_EVAL_PBGetState( BUTTON_USER ) ); //Wait for button release
+		while( 1 ){
+			STM_EVAL_LEDOn( orientationIndex );	//Indicate current orientation index
+			i = getShortLongButtonPress();
+			if( i==1 ){							//If short press, increment orientation index
+				orientationIndex++;
+				if( orientationIndex >= 8 ){
+					orientationIndex = 0;
+				}
+				LED_out_byte( 0x00 );
+			} else if ( i==2 ){					//If long press, save and exit orientation mode
+				saveCalibrationToFlash();		//Experimental and potentially dangerous: save calibration values and orientation to FLASH memory
+				for (i=0; i<=5; i++){			//Blink LEDs 5 times to indicate save
+					delayms( 100 );
+					STM_EVAL_LEDOn( orientationIndex );
+					delayms( 100 );
+					LED_out_byte( 0x00 );
+				}
+				break;
+			}
+		}
+	}
+}
 
 /**
  * @brief  Main program.
@@ -143,16 +190,10 @@ int main(void) {
 			}
 		}
 //----------------------------------------------------------------------------------------------------
-//		Check if user pushed the button and requested a gyro calibration
+//		Check if user pushed the button to change the settings
 //----------------------------------------------------------------------------------------------------
-		if ( STM_EVAL_PBGetState( BUTTON_USER ) ){	//If button pressed do gyro bias level calibration
-			for (i=0; i<=5; i++){					//Blink LEDs
-				delayms( 100 );
-				LED_out_byte( 0xFF );
-				delayms( 100 );
-				LED_out_byte( 0x00 );
-			}
-			doGyroBiasCalibration();				//Start calibration measurement
+		if ( STM_EVAL_PBGetState( BUTTON_USER ) ){	//Check if button is pressed
+			handleButton();							//ToDo: !!! Danger !!! This is blocking and will stall USB communications!
 		}
 //----------------------------------------------------------------------------------------------------
 //		Handle sensor data statemachine
@@ -336,20 +377,76 @@ void packSensorDataBlock( int32_t Xin, int32_t Yin, int32_t Zin, uint8_t *sensor
 }
 
 void packFoculusdataBlock() {
-// If the coordinate axes seem not right, here is the place to change it
-// These settings seem to fit for mounting the discovery board on the back of the HMD,
-// so that the LEDs point toward the face and the USB connectors point downwards
-// See also: riftCoord.png
+//	Here we do the transformation from the two different sensor coordinate systems
+//	to the libOVR coordinate system. We also allow 8 different mounting orientations
+//	of the STM discovery board.
+//  If the coordinate axes seem not right, here is the place to change it
 	static uint16_t timeStamp = 0;
-	packSensorDataBlock(  -accBuffer[1],  accBuffer[0],  accBuffer[2], dataToBeSent.rFrame.sensorData1 );		//Conv. Acc. data to Oculus format
-	packSensorDataBlock(  -gyroBuffer[0], -gyroBuffer[1], gyroBuffer[2], dataToBeSent.rFrame.sensorData1+8 );	//Conv. Gyro. data to Oculus format
 	dataToBeSent.rFrame.temp = tempBuffer;																		//Temperature
 	dataToBeSent.rFrame.commandID = 0;
 	dataToBeSent.rFrame.sampleCount = 1;
 	dataToBeSent.rFrame.timeStamp = timeStamp++;
-	dataToBeSent.rFrame.mX = -magBuffer[2];
-	dataToBeSent.rFrame.mY = magBuffer[0];
-	dataToBeSent.rFrame.mZ = magBuffer[1];
+	switch( orientationIndex ){		//This allows the sensor board to be mounted in 8 different orientations (configurable by the Userbutton)
+	default:
+	case 0:	// These settings seem to fit for mounting the discovery board on the back of the HMD,
+			// so that the LEDs point toward the face and the USB connectors point downwards
+			// See also: riftCoord.png
+		dataToBeSent.rFrame.mX = -magBuffer[ cmY ];
+		dataToBeSent.rFrame.mY =  magBuffer[ cmX ];
+		dataToBeSent.rFrame.mZ =  magBuffer[ cmZ ];
+		packSensorDataBlock(  -accBuffer[ caY ],  accBuffer[ caX ],  accBuffer[ caZ ], dataToBeSent.rFrame.sensorData1 );		//Conv. Acc. data to Oculus format
+		packSensorDataBlock(  -gyroBuffer[ cgX ], -gyroBuffer[ cgY ], gyroBuffer[ cgZ ], dataToBeSent.rFrame.sensorData1+8 );	//Conv. Gyro. data to Oculus format
+		break;
+	case 1:
+		dataToBeSent.rFrame.mX =  magBuffer[ cmY ];
+		dataToBeSent.rFrame.mY = -magBuffer[ cmX ];
+		dataToBeSent.rFrame.mZ =  magBuffer[ cmZ ];
+		packSensorDataBlock(  accBuffer[ caY ],  -accBuffer[ caX ],  accBuffer[ caZ ], dataToBeSent.rFrame.sensorData1 );		//Conv. Acc. data to Oculus format
+		packSensorDataBlock(  gyroBuffer[ cgX ], gyroBuffer[ cgY ], gyroBuffer[ cgZ ], dataToBeSent.rFrame.sensorData1+8 );	//Conv. Gyro. data to Oculus format
+		break;
+	case 2:
+		dataToBeSent.rFrame.mX =  magBuffer[ cmY ];
+		dataToBeSent.rFrame.mY =  magBuffer[ cmX ];
+		dataToBeSent.rFrame.mZ = -magBuffer[ cmZ ];
+		packSensorDataBlock(  accBuffer[ caY ],  accBuffer[ caX ],  -accBuffer[ caZ ], dataToBeSent.rFrame.sensorData1 );		//Conv. Acc. data to Oculus format
+		packSensorDataBlock(  gyroBuffer[ cgX ], -gyroBuffer[ cgY ], -gyroBuffer[ cgZ ], dataToBeSent.rFrame.sensorData1+8 );	//Conv. Gyro. data to Oculus format
+		break;
+	case 3:
+		dataToBeSent.rFrame.mX = -magBuffer[ cmY ];
+		dataToBeSent.rFrame.mY = -magBuffer[ cmX ];
+		dataToBeSent.rFrame.mZ = -magBuffer[ cmZ ];
+		packSensorDataBlock(  -accBuffer[ caY ],  -accBuffer[ caX ],  -accBuffer[ caZ ], dataToBeSent.rFrame.sensorData1 );		//Conv. Acc. data to Oculus format
+		packSensorDataBlock(  -gyroBuffer[ cgX ], gyroBuffer[ cgY ], -gyroBuffer[ cgZ ], dataToBeSent.rFrame.sensorData1+8 );	//Conv. Gyro. data to Oculus format
+		break;
+	case 4:
+		dataToBeSent.rFrame.mX = -magBuffer[ cmY ];
+		dataToBeSent.rFrame.mY =  magBuffer[ cmZ ];
+		dataToBeSent.rFrame.mZ = -magBuffer[ cmX ];
+		packSensorDataBlock(  -accBuffer[ caY ],  accBuffer[ caZ ],  -accBuffer[ caX ], dataToBeSent.rFrame.sensorData1 );		//Conv. Acc. data to Oculus format
+		packSensorDataBlock(  -gyroBuffer[ cgX ], gyroBuffer[ cgZ ], gyroBuffer[ cgY ], dataToBeSent.rFrame.sensorData1+8 );	//Conv. Gyro. data to Oculus format
+		break;
+	case 5:
+		dataToBeSent.rFrame.mX = magBuffer[ cmY ];
+		dataToBeSent.rFrame.mY = magBuffer[ cmZ ];
+		dataToBeSent.rFrame.mZ = magBuffer[ cmX ];
+		packSensorDataBlock(  accBuffer[ caY ],  accBuffer[ caZ ],  accBuffer[ caX ], dataToBeSent.rFrame.sensorData1 );		//Conv. Acc. data to Oculus format
+		packSensorDataBlock(  gyroBuffer[ cgX ], gyroBuffer[ cgZ ], -gyroBuffer[ cgY ], dataToBeSent.rFrame.sensorData1+8 );	//Conv. Gyro. data to Oculus format
+		break;
+	case 6:
+		dataToBeSent.rFrame.mX = -magBuffer[ cmX ];
+		dataToBeSent.rFrame.mY =  magBuffer[ cmZ ];
+		dataToBeSent.rFrame.mZ =  magBuffer[ cmY ];
+		packSensorDataBlock(  -accBuffer[ caX ],  accBuffer[ caZ ],  accBuffer[ caY ], dataToBeSent.rFrame.sensorData1 );		//Conv. Acc. data to Oculus format
+		packSensorDataBlock(  gyroBuffer[ cgY ], gyroBuffer[ cgZ ], gyroBuffer[ cgX ], dataToBeSent.rFrame.sensorData1+8 );	//Conv. Gyro. data to Oculus format
+		break;
+	case 7:
+		dataToBeSent.rFrame.mX =  magBuffer[ cmX ];
+		dataToBeSent.rFrame.mY =  magBuffer[ cmZ ];
+		dataToBeSent.rFrame.mZ = -magBuffer[ cmY ];
+		packSensorDataBlock(  accBuffer[ caX ],  accBuffer[ caZ ],  -accBuffer[ caY ], dataToBeSent.rFrame.sensorData1 );		//Conv. Acc. data to Oculus format
+		packSensorDataBlock(  -gyroBuffer[ cgY ], gyroBuffer[ cgZ ], -gyroBuffer[ cgX ], dataToBeSent.rFrame.sensorData1+8 );	//Conv. Gyro. data to Oculus format
+		break;
+	}
 }
 
 /**
