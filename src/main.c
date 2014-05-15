@@ -398,11 +398,11 @@ void packFoculusdataBlock() {
 		packSensorDataBlock(  -gyroBuffer[ cgX ], -gyroBuffer[ cgY ], gyroBuffer[ cgZ ], dataToBeSent.rFrame.sensorData1+8 );	//Conv. Gyro. data to Oculus format
 		break;
 	case 1:
-		dataToBeSent.rFrame.mX =  magBuffer[ cmY ];
-		dataToBeSent.rFrame.mY = -magBuffer[ cmX ];
-		dataToBeSent.rFrame.mZ =  magBuffer[ cmZ ];
-		packSensorDataBlock(  accBuffer[ caY ],  -accBuffer[ caX ],  accBuffer[ caZ ], dataToBeSent.rFrame.sensorData1 );		//Conv. Acc. data to Oculus format
-		packSensorDataBlock(  gyroBuffer[ cgX ], gyroBuffer[ cgY ], gyroBuffer[ cgZ ], dataToBeSent.rFrame.sensorData1+8 );	//Conv. Gyro. data to Oculus format
+		dataToBeSent.rFrame.mX = -magBuffer[ cmX ];
+		dataToBeSent.rFrame.mY =  magBuffer[ cmY ];
+		dataToBeSent.rFrame.mZ = -magBuffer[ cmZ ];
+		packSensorDataBlock(  -accBuffer[ caX ],  accBuffer[ caY ],  -accBuffer[ caZ ], dataToBeSent.rFrame.sensorData1 );		//Conv. Acc. data to Oculus format
+		packSensorDataBlock(  gyroBuffer[ cgY ], gyroBuffer[ cgX ], -gyroBuffer[ cgZ ], dataToBeSent.rFrame.sensorData1+8 );	//Conv. Gyro. data to Oculus format
 		break;
 	case 2:
 		dataToBeSent.rFrame.mX =  magBuffer[ cmY ];
