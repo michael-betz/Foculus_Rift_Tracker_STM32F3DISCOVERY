@@ -67,8 +67,21 @@ for > 1 second. Then you will be able to select one out of 8 preconfigured orien
 indicated by the blinking LED. After pushing the "USER" button again for > 1 second, the setting
 is also permanently saved to FLASH memory.
 
-ToDo: Add a table here, showing the preconfigured orientations  
-
+One of the following orientations can be chosen at the moment:
+<pre>
+-------------------------------------------------------
+LED label     Orientation
+-------------------------------------------------------
+LD3  (Red)    LEDs toward user     USB down
+LD4  (Blue)   LEDs toward user     USB right
+LD5  (Orange) LEDs away from user  USB down
+LD6  (Green)  LEDs away from user  USB up
+LD7  (Green)  LEDs up              USB toward user
+LD8  (Orange) LEDs up              USB away from user
+LD9  (Blue)   LEDs up              USB to users right
+LD10 (Red)    LEDs up              USB to user right
+-------------------------------------------------------
+</pre>
 
 Changelog
 --------------------------------
