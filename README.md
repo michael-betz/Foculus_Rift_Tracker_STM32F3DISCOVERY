@@ -4,6 +4,10 @@ A USB HID device, sending Accelerometer, Gyroscope and Magnetometer data over US
 
 This project comes in useful, if you are building your own DIY Head Mounted Display. It solves the problem of finding a motion tracker. The firmware runs on the STM32F3DISCOVERY board and should be compatible with all Oculus Rift games.
 
+Note
+-----
+This project is not maintained anymore and is kept here for documentation purposes only. Feel free to fork and continue the development.
+
 Development blog
 ------------------
 More details about the reverse engineering can be found on the [development blog](http://yetifrisstlama.blogspot.fr/2014/03/the-foculus-rift-part-2-reverse.html).
